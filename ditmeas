@@ -1,0 +1,156 @@
+_Hawk = "ohhahtuhthttouttpwuttuaunbotwo"
+local Hawk = loadstring(game:HttpGet("https://raw.githubusercontent.com/TheHanki/HawkHUB/main/LibSources/HawkLib.lua", true))()
+local Window = Hawk:Window({
+    ScriptName = "Gay Hub X Eogibiti",
+    DestroyIfExists = false, -- if false, GUI won't disappear
+    Theme = "Dark" -- Themes: Pink, White, Dark
+})
+
+-- Close button functionality
+Window:Close({
+    visibility = true,
+    Callback = function()
+        Window:Destroy() -- Destroying GUI
+    end
+})
+
+-- Minimize button functionality
+Window:Minimize({
+    visibility = true,
+    OpenButton = true,
+    Callback = function() end
+})
+
+-- Tab and section
+local tab1 = Window:Tab("MISC")
+local newsec = tab1:Section("GAY HUB MISC")
+
+-- Dungeon data: name and position
+local dungeons = {
+    ["King Of Hell Zoru"] = Vector3.new(-2599.11, 14.7828, -2007.38),
+    ["[ Awaken Cid ]"] = Vector3.new(-6477.67, 8.06364, 1599.11),
+    ["Gear 5"] = Vector3.new(5382.8, 26.2211, -111.324),
+    ["True Demon Lord Rimuro"] = Vector3.new(1156.17, 5.30349, -2853.94),
+    ["Wukong Dungeon"] = Vector3.new(-611.972, 66.1005, -7187.31),
+    ["Gear 5 Duo"] = Vector3.new(5555.81, 27.25, -570.905),
+    ["[ Evolved Veguta Dungeon ]"] = Vector3.new(1025.18, 16.5194, 4553.38),
+    ["Gorp Dungeon"] = Vector3.new(5546.75, 67.5993, -796.221),
+    ["[ Kaijo 8 ]"] = Vector3.new(-418.353, 65.7873, -6440.68),
+    ["[ Revived Gojoh ]"] = Vector3.new(-1891.03, 13.307, -10208),
+    ["[ Goguta Blue ]"] = Vector3.new(380.547, 47.3187, -7296.61),
+    ["[ Six Paths Madaro ]"] = Vector3.new(3508.43, 10.7641, 540.694),
+    ["Narudo/Sasooke Duo"] = Vector3.new(3915.97, 63.0961, 496.913),
+    ["[ SSJ 100/Gear 6 ]"] = Vector3.new(-419.779, -1672.23, -6439.31),
+    ["[ The World ]"] = Vector3.new(-46.3965, 46.3172, -6286.45),
+    ["Yorichi"] = Vector3.new(-6006.42, 9.45149, 1369.1),
+    ["Infinite Castle: Akazo"] = Vector3.new(-4785.31, 72.1633, -2002.78),
+    ["Kokushibu Dungeon"] = Vector3.new(-1788.22, 31.3453, 2414.95)
+}
+
+-- Dropdown for selecting dungeon
+local dungeonNames = {}
+for dungeonName, _ in pairs(dungeons) do
+    table.insert(dungeonNames, dungeonName)
+end
+
+local selectedDungeon = nil
+local dungeonDropdown = newsec:Dropdown("Select Dungeon", dungeonNames, function(selected)
+    selectedDungeon = selected
+end)
+
+-- Button to teleport to selected dungeon
+newsec:Button("Teleport", "Teleport to the selected dungeon", function()
+    if selectedDungeon and dungeons[selectedDungeon] then
+        -- Teleport to the selected dungeon
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(dungeons[selectedDungeon])
+    else
+        print("Please select a dungeon first!")
+    end
+end)
+
+-- Toggle for instant kill with WaveEnemies
+local instantKillWaveEnemiesToggle = newsec:Toggle("Instant Kill (WaveEnemies)", false, function(value)
+    getgenv().InstantKillWaveEnemies = value
+end)
+
+-- Toggle for instant kill with Boss
+local instantKillBossToggle = newsec:Toggle("Instant Kill (Boss)", false, function(value)
+    getgenv().InstantKillBoss = value
+end)
+
+-- Toggle for teleporting to mob and killing it
+local teleportAndKillToggle = newsec:Toggle("Teleport & Kill", false, function(value)
+    getgenv().TeleportAndKill = value
+end)
+
+-- Instant Kill Implementation for WaveEnemies only
+local damageAmount = 18000000000 -- 18 billion damage
+local killThreshold = 10 -- adjust this value to change the health threshold for killing
+
+local function instantKillWaveEnemies()
+    while getgenv().InstantKillWaveEnemies do
+        task.wait(1) -- Use task.wait() for better performance
+        pcall(function() -- Use pcall to catch errors and avoid crashes
+            sethiddenproperty(game.Players.LocalPlayer, "SimulationRadius", math.huge)
+            sethiddenproperty(game.Players.LocalPlayer, "MaxSimulationRadius", math.huge)
+            
+            local waveEnemiesFolder = workspace:FindFirstChild("WaveEnemies")
+            if waveEnemiesFolder then
+                for _, mob in ipairs(waveEnemiesFolder:GetDescendants()) do
+                    if mob:IsA('Humanoid') and mob.Parent:IsA('Model') and mob.Parent.Name ~= game.Players.LocalPlayer.Name then
+                        mob.Health = mob.Health - damageAmount
+
+                        if mob.Health <= killThreshold then
+                            mob.Health = 0
+                        end
+                    end
+                end
+            end
+        end)
+    end
+end
+
+-- Instant Kill Implementation for Boss only
+local function instantKillBoss()
+    while getgenv().InstantKillBoss do
+        task.wait(1) -- Use task.wait() for better performance
+        pcall(function() -- Use pcall to catch errors and avoid crashes
+            local bossFolder = workspace:FindFirstChild("Boss")
+            if bossFolder then
+                for _, boss in ipairs(bossFolder:GetDescendants()) do
+                    if boss:IsA('Humanoid') and boss.Parent:IsA('Model') and boss.Parent.Name ~= game.Players.LocalPlayer.Name then
+                        boss.Health = 0
+                    end
+                end
+            end
+        end)
+    end
+end
+
+-- Teleport & Kill Implementation
+game:GetService("RunService").Stepped:Connect(function()
+    if getgenv().TeleportAndKill then
+        local folders = {"Boss", "WaveEnemies"}
+        for _, folderName in ipairs(folders) do
+            local folder = workspace:FindFirstChild(folderName)
+            if folder then
+                for _, mob in pairs(folder:GetChildren()) do
+                    if mob:IsA("Model") and mob:FindFirstChild("Humanoid") and mob.Humanoid.Health > 0 then
+                        -- Teleport player to the top of the mob
+                        local player = game.Players.LocalPlayer
+                        local character = player.Character or player.CharacterAdded:Wait()
+                        local humanoidRootPart = mob:FindFirstChild("HumanoidRootPart")
+                        if humanoidRootPart then
+                            local newPosition = humanoidRootPart.Position + Vector3.new(0, 30, 0)
+                            character:MoveTo(newPosition)
+                        end
+                    end
+                end
+            end
+        end
+    end
+end)
+
+-- Start Instant Kill for WaveEnemies and Boss on separate threads
+spawn(instantKillWaveEnemies)
+spawn(instantKillBoss)
