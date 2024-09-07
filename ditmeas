@@ -141,7 +141,7 @@ game:GetService("RunService").Stepped:Connect(function()
                         local character = player.Character or player.CharacterAdded:Wait()
                         local humanoidRootPart = mob:FindFirstChild("HumanoidRootPart")
                         if humanoidRootPart then
-                            local newPosition = humanoidRootPart.Position + Vector3.new(0, 30, 0)
+                            local newPosition = humanoidRootPart.Position + Vector3.new(0, 50, 0)
                             character:MoveTo(newPosition)
                         end
                     end
